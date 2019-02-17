@@ -1,28 +1,179 @@
 <!DOCTYPE html>
 <html>
-<head>
-<meta charset="utf-8">
-<title>kousuan</title>
-<script src="https://unpkg.com/vue/dist/vue.js"></script>
-</head>
-<body>
-<div id="app">
-    <input type=button @click="genMessage">
-  <p>{{ message }}</p>
-</div>
 
-<script>
-new Vue({
-  el: '#app',
-  data: {
-    message: 'Hello Vue.js!'
-  },
-  methods: {
-      genMessage : function() {
-          this.message = "1+1"
+<head>
+  <meta charset="utf-8">
+  <title>kousuan</title>
+  <script src="https://unpkg.com/vue/dist/vue.js"></script>
+</head>
+
+<body>
+  <div id="app">
+
+    题目数量：<input v-model="number">
+    <input type=button @click="gen100" value="100加">
+    <input type=button @click="gen100s" value="100减">
+    <input type=button @click="gen1000" value="666">
+    <br />四年级题型
+    <input type=button @click="gen401" value="AxB+C">
+    <input type=button @click="gen402" value="AxB/C">
+    <input type=button @click="gen403" value="A0B0">
+    <div v-html="message"></div>
+
+  </div>
+
+  <script>
+    var x, y, z, op, result
+
+    //get a random integer number with range   [min,max)
+    function getNum(min, max) {
+      //var r = Math.random() //0~1
+      var r = getRandom()
+      r = min + r * (max - min)
+      return Math.floor(r)
+
+    }
+    //正态分布的随机数
+    /*
+    https://en.wikipedia.org/wiki/Box%E2%80%93Muller_transform
+    https://en.wikipedia.org/wiki/Marsaglia_polar_method
+    z0 = sqrt( - 2 ln(U1) ) cos( 2 pi U2 ) = u * sqrt(-2ln(s)/s)
+    z1 = sqrt( - 2 ln(U1) ) sin( 2 pi U2 ) = v * sqrt(-2ln(s)/s)
+    s =u*u + v*v
+    u,v = -1 ~ 1
+*/
+
+    function getRandom() {
+      var u, v, s
+      do {
+        u = Math.random()
+        v = Math.random()
+        s = u * u + v * v
+      } while (s == 0 || s >= 1)
+
+      return s
+    }
+
+
+    new Vue({
+      el: '#app',
+      data: {
+        number: 10,
+        message: 'Welcome to KOUSUAN generator!'
+      },
+      methods: {
+
+        gen100: function () {
+          this.message = "";
+          for (var i = 0; i < this.number; i++) {
+            x = getNum(10, 89)
+            y = getNum(10, 99 - x)
+            this.message += x + " + " + y + " = <br>"
+          }
+        },
+
+        gen100s: function () {
+          this.message = "";
+          for (var i = 0; i < this.number; i++) {
+            x = getNum(10, 99)
+            y = getNum(9, x - 1)
+            this.message += x + " - " + y + " = <br>"
+          }
+        },
+
+        gen1000: function () {
+          this.message = ""
+          for (var i = 0; i < this.number; i++) {
+            x = getNum(101, 899)
+
+            if (x % 2 == 0) {
+              op = "+"
+              y = getNum(100, 999 - x)
+            } else {
+              op = "-"
+              y = getNum(50, x - 50)
+            }
+
+            this.message += x + " " + op + " " + y + " = <br>"
+
+          }
+        },
+
+        gen401: function () {
+          this.message = "四年级题型A*B+C " + this.number + "<br/>"
+          for (var i = 0; i < this.number; i++) {
+            do {
+              x = getNum(11, 20)
+              y = getNum(4, 12)
+              z = getNum(35, 80)
+              if (getNum(1, 5) % 2 == 0) {
+                op = "-"
+                result = x * y - z
+              } else {
+                op = "+"
+                result = x * y + z
+              }
+            } while (result >= 155 || result < 10)
+            console.log(result + " " + op.indexOf('-'))
+            //we can exchange A+B -to- B+A
+            if (op.indexOf('-') == 0 || getNum(1, 9) < 6) {
+              this.message += x + "x" + y + op + z + " = " + result + "<br/>"
+            } else {
+              this.message += z + op + x + "x" + y + " = " + result + "<br/>"
+            }
+          }
+        },
+
+        gen402: function () {
+          this.message = "四年级题型A/B+C " + this.number + "<br/>"
+          for (var i = 0; i < this.number; i++) {
+            do {
+              x = getNum(45, 120)
+              y = getNum(4, 12)
+              z = getNum(35, 80)
+              if (getNum(1, 5) % 2 == 0) {
+                op = "-"
+                result = x / y - z
+              } else {
+                op = "+"
+                result = x / y + z
+              }
+            } while (result >= 155 || result < 10 || Math.floor(result) != result)
+
+            if (op.indexOf('-') == 0 || getNum(1, 9) < 6) {
+              this.message += x + "÷" + y + op + z + " = " + result + "<br/>"
+            } else {
+              this.message += z + op + x + "÷" + y + " = " + result + "<br/>"
+            }
+          }
+        },
+
+        gen403: function () {
+          this.message = "四年级题型A0B0" + this.number + "<br/>"
+          for (var i = 0; i < this.number; i++) {
+            do {
+
+              y = getNum(4, 12) * 10
+
+              if (getNum(1, 5) < 2) {
+                x = getNum(5, 20) * 10
+                op = "x"
+                result = x * y
+              } else {
+                x = getNum(15, 40) * 10
+                op = "÷"
+                result = x / y
+              }
+            } while (Math.floor(result) != result)
+
+            this.message += x + op + y + " = " + result + "<br/>"
+          }
+        }
+
       }
-  }
-})
-</script>
+    })
+  </script>
 </body>
+
+
 </html>
